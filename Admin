@@ -1,0 +1,117 @@
+// admin.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #007BFF;
+            color: white;
+        }
+        .actions button {
+            margin: 5px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .actions button:hover {
+            background: #0056b3;
+            color: white;
+        }
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Admin Page</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Balance</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="accountTableBody"></tbody>
+        </table>
+        <button onclick="exportAccounts()">Export All Accounts</button>
+    </div>
+    
+    <script>
+        function loadAccounts() {
+            let accounts = JSON.parse(localStorage.getItem("accounts"))  [];
+            const tableBody = document.getElementById("accountTableBody");
+            tableBody.innerHTML = "";
+            accounts.forEach(acc => {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td>${acc.name}</td>
+                                 <td>${acc.balance}</td>
+                                 <td class='actions'>
+                                     <button class='delete-btn' onclick="deleteAccount('${acc.name}')">Delete</button>
+                                 </td>`;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function deleteAccount(name) {
+            let accounts = JSON.parse(localStorage.getItem("accounts"))  [];
+            accounts = accounts.filter(acc => acc.name !== name);
+            localStorage.setItem("accounts", JSON.stringify(accounts));
+            loadAccounts();
+        }
+        
+        function exportAccounts() {
+            let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+            if (accounts.length === 0) {
+                alert("No accounts to export.");
+                return;
+            }
+            const dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(accounts, null, 2));
+            const link = document.createElement("a");
+            link.setAttribute("href", dataStr);
+            link.setAttribute("download", "accounts.json");
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+        
+        window.onload = loadAccounts;
+    </script>
+</body>
+</html>
