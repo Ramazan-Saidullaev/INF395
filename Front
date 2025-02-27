@@ -1,0 +1,80 @@
+// client.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Client Page</h2>
+        <input id="accountName" placeholder="Account Name">
+        <input id="accountBalance" type="number" placeholder="Initial Balance">
+        <button onclick="addAccount()">Add Account</button>
+        <input id="queryName" placeholder="Query Account Name">
+        <button onclick="queryBalance()">Query Balance</button>
+        <p id="queryResult"></p>
+    </div>
+    
+    <script>
+        function addAccount() {
+            const name = document.getElementById("accountName").value.trim();
+            const balance = document.getElementById("accountBalance").value.trim();
+            let accounts = JSON.parse(localStorage.getItem("accounts"))  [];
+            
+            if (name && balance && !isNaN(balance)) {
+                accounts.push({ name, balance: parseFloat(balance).toFixed(2) });
+                localStorage.setItem("accounts", JSON.stringify(accounts));
+                document.getElementById("accountName").value = "";
+                document.getElementById("accountBalance").value = "";
+            }
+        }
+        
+        function queryBalance() {
+            const name = document.getElementById("queryName").value.trim();
+            let accounts = JSON.parse(localStorage.getItem("accounts"))  [];
+            const account = accounts.find(acc => acc.name.toLowerCase() === name.toLowerCase());
+            document.getElementById("queryResult").textContent = account ? Balance: ${account.balance} : "Not Found";
+        }
+    </script>
+</body>
+</html>
