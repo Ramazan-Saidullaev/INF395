@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #f0f2f5;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background-color: #007BFF;
+            color: white;
+        }
+        .content {
+            display: none;
+        }
+        .content.active {
+            display: block;
+        }
+        .success-message {
+            color: green;
+            margin-top: 10px;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Client Page</h2>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('register')">Register</div>
+            <div class="tab" onclick="switchTab('login')">Login</div>
+        </div>
+        
+        <div id="registerContent" class="content active">
+            <h3>Register New Account</h3>
+            <input id="accountName" placeholder="Account Name">
+            <input id="accountPassword" type="password" placeholder="Password">
+            <input id="accountBalance" type="number" placeholder="Initial Balance">
+            <button onclick="addAccount()">Create Account</button>
+            <p id="registerMessage" class="success-message"></p>
+        </div>
+        
+        <div id="loginContent" class="content">
+            <h3>Login to Your Account</h3>
+            <input id="loginName" placeholder="Account Name">
+            <input id="loginPassword" type="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <p id="loginMessage" class="error-message"></p>
+            
+            <div id="accountDetails" style="display: none; margin-top: 20px;">
+                <h3>Your Account</h3>
+                <p id="welcomeMessage"></p>
+                <p id="balanceDisplay"></p>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function switchTab(tab) {
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            // Deactivate all content sections
+            document.querySelectorAll('.content').forEach(c => {
+                c.classList.remove('active');
+            });
+            
+            // Activate selected tab
+            if (tab === 'register') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('registerContent').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('loginContent').classList.add('active');
+            }
+            
+            // Clear error messages
+            document.getElementById('registerMessage').textContent = '';
+            document.getElementById('loginMessage').textContent = '';
+        }
+        
+        function addAccount() {
+            const name = document.getElementById("accountName").value.trim();
+            const password = document.getElementById("accountPassword").value;
+            const balance = document.getElementById("accountBalance").value.trim();
+            let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+            
+            if (!name || !password || !balance || isNaN(balance)) {
+                document.getElementById("registerMessage").textContent = "Please fill in all fields correctly";
+                document.getElementById("registerMessage").style.color = "red";
+                return;
+            }
+            
+            // Check if account already exists
+            const existingAccount = accounts.find(acc => acc.name.toLowerCase() === name.toLowerCase());
+            if (existingAccount) {
+                document.getElementById("registerMessage").textContent = "Account with this name already exists";
+                document.getElementById("registerMessage").style.color = "red";
+                return;
+            }
+            
+            // Validate password length
+            if (password.length < 4) {
+                document.getElementById("registerMessage").textContent = "Password must be at least 4 characters";
+                document.getElementById("registerMessage").style.color = "red";
+                return;
+            }
+            
+            accounts.push({ 
+                name, 
+                password, 
+                balance: parseFloat(balance).toFixed(2) 
+            });
+            localStorage.setItem("accounts", JSON.stringify(accounts));
+            
+            document.getElementById("accountName").value = "";
+            document.getElementById("accountPassword").value = "";
+            document.getElementById("accountBalance").value = "";
+            document.getElementById("registerMessage").textContent = "Account created successfully!";
+            document.getElementById("registerMessage").style.color = "green";
+            
+            // Automatically switch to login tab after successful registration
+            setTimeout(() => {
+                switchTab('login');
+                document.getElementById("loginName").value = name;
+            }, 1500);
+        }
+        
+        function login() {
+            const name = document.getElementById("loginName").value.trim();
+            const password = document.getElementById("loginPassword").value;
+            let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+            
+            // Clear previous error message
+            document.getElementById("loginMessage").textContent = "";
+            
+            // Find account by name
+            const account = accounts.find(acc => acc.name.toLowerCase() === name.toLowerCase());
+            
+            if (!account) {
+                document.getElementById("loginMessage").textContent = "Account not found. Please check the name or register.";
+                return;
+            }
+            
+            // Verify password
+            if (account.password !== password) {
+                document.getElementById("loginMessage").textContent = "Incorrect password. Please try again.";
+                return;
+            }
+            
+            // Show account details
+            document.getElementById("accountDetails").style.display = "block";
+            document.getElementById("welcomeMessage").textContent = `Welcome, ${account.name}!`;
+            document.getElementById("balanceDisplay").textContent = `Your Balance: ${account.balance}`;
+            
+            // Hide login form
+            document.getElementById("loginName").style.display = "none";
+            document.getElementById("loginPassword").style.display = "none"; 
+            document.getElementById("loginMessage").style.display = "none";
+            document.querySelector("#loginContent button").style.display = "none";
+        }
+        
+        function logout() {
+            // Hide account details
+            document.getElementById("accountDetails").style.display = "none";
+            
+            // Show login form
+            document.getElementById("loginName").style.display = "block";
+            document.getElementById("loginPassword").style.display = "block";
+            document.getElementById("loginMessage").style.display = "block";
+            document.getElementById("loginName").value = "";
+            document.getElementById("loginPassword").value = "";
+            document.querySelector("#loginContent button").style.display = "block";
+        }
+        
+        window.onload = function() {
+            // Reset any previous login state
+            logout();
+        };
+    </script>
+</body>
+</html>
